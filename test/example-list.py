@@ -40,16 +40,16 @@ n = nlp.n
 nnzj = nlp.nnzj
 nnzh = nlp.nnzh
 
-def eval_f(x):
+def eval_f(x, user_data=None):
 	return nlp.obj(array(x))
 
-def eval_grad_f(x):
+def eval_grad_f(x, user_data=None):
 	return nlp.grad(array(x)).tolist()	# return ndarray
 
-def eval_g(x):
+def eval_g(x, user_data=None):
 	return  nlp.cons(array(x)).tolist()
-	
-def eval_jac_g(x, flag):
+
+def eval_jac_g(x, flag, user_data=None):
 	if flag:
 		dummy, row1, col1 = nlp.jac(array(x0))
 		return (row1.tolist(), col1.tolist())
@@ -69,5 +69,19 @@ def eval_h(x, lagrange, obj_factor, flag):
 		assert len(temph) == nnzh
 		return temph.tolist()
 
-pyipopt.create(n, xl, xu, m, gl, gu, nnzj, 0, eval_f, eval_grad_f, eval_g, eval_jac_g, eval_h)
-pyipopt.solve(x0)
+print n, m
+print xl, xu
+print nnzj
+print gl, gu
+print x0
+print eval_f(x0)
+print eval_grad_f(x0)
+print eval_g(x0)
+print eval_jac_g(x0, False)
+print eval_jac_g(x0, True)
+
+nlp = pyipopt.create(n, xl, xu, m, gl, gu, nnzj, 0, eval_f, eval_grad_f, eval_g, eval_jac_g, )
+
+print nlp
+
+#nlp.solve(x0)

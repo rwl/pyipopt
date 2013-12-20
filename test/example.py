@@ -13,7 +13,7 @@ x_U = ones((nvar), dtype=float_) * 5.0
 ncon = 2
 
 g_L = array([25.0, 40.0])
-g_U = array([2.0*pow(10.0, 19), 40.0]) 
+g_U = array([2.0*pow(10.0, 19), 40.0])
 
 def eval_f(x, user_data = None):
 	assert len(x) == 4
@@ -22,36 +22,36 @@ def eval_f(x, user_data = None):
 def eval_grad_f(x, user_data = None):
 	assert len(x) == 4
 	grad_f = array([
-  		x[0] * x[3] + x[3] * (x[0] + x[1] + x[2]) , 
+  		x[0] * x[3] + x[3] * (x[0] + x[1] + x[2]) ,
   		x[0] * x[3],
   		x[0] * x[3] + 1.0,
   		x[0] * (x[0] + x[1] + x[2])
   		], float_)
 	return grad_f;
-	
+
 def eval_g(x, user_data= None):
 	assert len(x) == 4
 	return array([
-		x[0] * x[1] * x[2] * x[3], 
+		x[0] * x[1] * x[2] * x[3],
 		x[0]*x[0] + x[1]*x[1] + x[2]*x[2] + x[3]*x[3]
 	], float_)
 
 nnzj = 8
 def eval_jac_g(x, flag, user_data = None):
 	if flag:
-		return (array([0, 0, 0, 0, 1, 1, 1, 1]), 
+		return (array([0, 0, 0, 0, 1, 1, 1, 1]),
 			array([0, 1, 2, 3, 0, 1, 2, 3]))
 	else:
 		assert len(x) == 4
-		return array([ x[1]*x[2]*x[3], 
-					x[0]*x[2]*x[3], 
-					x[0]*x[1]*x[3], 
+		return array([ x[1]*x[2]*x[3],
+					x[0]*x[2]*x[3],
+					x[0]*x[1]*x[3],
 					x[0]*x[1]*x[2],
-					2.0*x[0], 
-					2.0*x[1], 
-					2.0*x[2], 
+					2.0*x[0],
+					2.0*x[1],
+					2.0*x[2],
 					2.0*x[3] ])
-		
+
 nnzh = 10
 def eval_h(x, lagrange, obj_factor, flag, user_data = None):
 	if flag:
@@ -86,8 +86,9 @@ def eval_h(x, lagrange, obj_factor, flag, user_data = None):
 
 def apply_new(x):
 	return True
-	
-nlp = pyipopt.create(nvar, x_L, x_U, ncon, g_L, g_U, nnzj, nnzh, eval_f, eval_grad_f, eval_g, eval_jac_g)
+
+nlp = pyipopt.create(nvar, x_L, x_U, ncon, g_L, g_U, nnzj, nnzh,
+					 eval_f, eval_grad_f, eval_g, eval_jac_g, eval_h)
 
 x0 = array([1.0, 5.0, 5.0, 1.0])
 pi0 = array([1.0, 1.0])
@@ -106,22 +107,22 @@ print eval_jac_g(x0, False)
 print eval_h(x0, pi0, 1.0, False)
 print eval_h(x0, pi0, 1.0, True)
 """
+print "Going to call solve"
+print x0
+x, zl, zu, obj, status = nlp.solve(x0)
+# import pdb; pdb.set_trace()
 
-r = nlp.solve(x0)
+## get constraint multipliers
+x, zl, zu, obj, status, zG = nlp.solve(x0, ncon)
+
 nlp.close()
 
 print "Solution of the primal variables, x"
-print r["x"]
+print x
 
 print "Solution of the bound multipliers, z_L and z_U"
-print r["mult_xL"], r["mult_xU"]
-
-print "Solution of the constraint multiplier, lambda"
-print r["mult_g"]
+print zl, zu
 
 print "Objective value"
-print "f(x*) =", r["f"]
-
-print "Constraint value"
-print "g(x*) =", r["g"]
+print "f(x*) =", obj
 
